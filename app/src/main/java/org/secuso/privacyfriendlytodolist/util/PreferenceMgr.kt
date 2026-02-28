@@ -83,11 +83,16 @@ object PreferenceMgr {
         return hashBytes.joinToString("") { "%02x".format(it) }
     }
 
+    fun isPinHash(pin: String?): Boolean {
+        // A SHA-256 hex hash is always exactly 64 lowercase hex characters
+        return pin != null && pin.length == 64 && pin.all { it in '0'..'9' || it in 'a'..'f' }
+    }
+
     fun migratePinToHash(context: Context) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         val storedPin = prefs.getString(P_PIN.name, null) ?: return
-        // A SHA-256 hex hash is always exactly 64 characters; a raw PIN is 4-32 digits
-        if (storedPin.length < 64) {
+        // Migrate only if the stored value is a raw PIN (not already a SHA-256 hex hash)
+        if (!isPinHash(storedPin)) {
             prefs.edit { putString(P_PIN.name, hashPin(storedPin)) }
         }
     }

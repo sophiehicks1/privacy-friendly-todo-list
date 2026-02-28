@@ -43,6 +43,7 @@ interface PinCallback {
 class PinDialog(context: Context, private val allowReset: Boolean) :
     FullScreenDialog<PinCallback>(context, R.layout.pin_dialog) {
     private var wrongCounter = 0
+    private var lockoutTimer: CountDownTimer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -119,16 +120,24 @@ class PinDialog(context: Context, private val allowReset: Boolean) :
         textEditPin.isActivated = true
     }
 
+    override fun onStop() {
+        lockoutTimer?.cancel()
+        lockoutTimer = null
+        super.onStop()
+    }
+
     private fun checkAndApplyLockout(prefs: SharedPreferences, okButton: Button) {
         val lockoutUntil = prefs.getString(PreferenceMgr.P_PIN_LOCKOUT_UNTIL.name, "0")?.toLongOrNull() ?: 0L
         val remaining = lockoutUntil - System.currentTimeMillis()
         if (remaining > 0) {
             okButton.isEnabled = false
-            object : CountDownTimer(remaining, 1000) {
+            lockoutTimer?.cancel()
+            lockoutTimer = object : CountDownTimer(remaining, 1000) {
                 override fun onTick(millisUntilFinished: Long) {
                     okButton.text = context.getString(R.string.pin_locked_countdown, millisUntilFinished / 1000)
                 }
                 override fun onFinish() {
+                    lockoutTimer = null
                     okButton.isEnabled = true
                     okButton.setText(R.string.ok)
                 }

@@ -114,7 +114,7 @@ class SettingsActivity : AppCompatActivity() {
             val pinEnabled = sharedPreferences.getBoolean(PreferenceMgr.P_IS_PIN_ENABLED.name, false)
             if (pinEnabled) {
                 val pin = sharedPreferences.getString(PreferenceMgr.P_PIN.name, null)
-                if (!isPinValid(pin) && !isPinHash(pin)) {
+                if (!isPinValid(pin) && !PreferenceMgr.isPinHash(pin)) {
                     // pin invalid: uncheck
                     ignoreChanges = true
                     findPreference<SwitchPreference>(PreferenceMgr.P_IS_PIN_ENABLED.name)!!.isChecked = false
@@ -182,11 +182,6 @@ class SettingsActivity : AppCompatActivity() {
                 isValid = false
             }
             return isValid
-        }
-
-        private fun isPinHash(pin: String?): Boolean {
-            // A SHA-256 hex hash is always exactly 64 lowercase hex characters
-            return pin != null && pin.length == 64 && pin.all { it in '0'..'9' || it in 'a'..'f' }
         }
     }
 }
