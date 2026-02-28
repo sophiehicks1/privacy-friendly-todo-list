@@ -158,6 +158,7 @@
     <!-- PIN -->
     <string name="enter_pin">Enter PIN</string>
     <string name="wrong_pin">Wrong PIN</string>
+    <string name="pin_locked_countdown">Try again in %ds</string>
     <string name="reset_application_button">Reset application</string>
     <string name="invalid_pin">Please enter a PIN with 4 digits.</string>
     <string name="reset_application_msg">Do you really want to reset the application? This will remove the PIN-protection and delete all To-Do lists.</string>
@@ -259,6 +260,7 @@
     <string name="notif_reminder_act_snooze">Snooze %1$s</string>
     <string name="notif_reminder_act_snooze_until_deadline">Snooze until deadline</string>
     <string name="notif_reminder_act_done">Set done</string>
+    <string name="notif_public_content_text">You have a pending task reminder</string>
     <!-- Date and Time -->
     <string name="weekdays">Weekdays</string>
     <string name="monday">Monday</string>
