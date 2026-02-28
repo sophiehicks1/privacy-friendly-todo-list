@@ -41,6 +41,7 @@ class PFAApplication : Application(), Configuration.Provider, OnPreferenceChange
 
     override fun onCreate() {
         super.onCreate()
+        PreferenceMgr.migratePinToHash(this)
         BackupManager.backupCreator = BackupCreator()
         BackupManager.backupRestorer = BackupRestorer()
         TodoListWidget.registerAsModelObserver(this)

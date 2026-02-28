@@ -40,6 +40,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.secuso.privacyfriendlytodolist.R
 import org.secuso.privacyfriendlytodolist.model.TodoTask
 import org.secuso.privacyfriendlytodolist.receiver.NotificationReceiver
+import org.secuso.privacyfriendlytodolist.util.PinUtil
 import org.secuso.privacyfriendlytodolist.view.MainActivity
 
 /**
@@ -112,9 +113,21 @@ object NotificationMgr {
             .setSmallIcon(R.drawable.ic_checkbox)
             .setAutoCancel(true)
             .setLights(ContextCompat.getColor(context, R.color.colorPrimary), 1000, 500)
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
         if (null != message) {
             builder.setContentText(message)
         }
+
+        if (PinUtil.hasPin(context)) {
+            val publicVersion = NotificationCompat.Builder(context, CHANNEL_ID)
+                .setContentTitle(context.getString(R.string.app_name))
+                .setContentText(context.getString(R.string.notif_public_content_text))
+                .setSmallIcon(R.drawable.ic_checkbox)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .build()
+            builder.setPublicVersion(publicVersion)
+        }
+
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         // If Build.VERSION.SDK_INT >= Build.VERSION_CODES.O its no longer possible for the app to
         // change notification sound after channel was created. Only user can change that in

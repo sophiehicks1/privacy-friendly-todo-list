@@ -24,6 +24,7 @@ import java.util.Calendar
 import java.util.Locale
 import androidx.core.content.edit
 import org.secuso.privacyfriendlytodolist.view.ContentHome
+import java.security.MessageDigest
 
 enum class PrefDataType {
     BOOLEAN, STRING
@@ -57,6 +58,8 @@ object PreferenceMgr {
     private val P_IS_FIRST_TIME_LAUNCH = PrefMetaData("isFirstTimeLaunch", PrefDataType.BOOLEAN)
     val P_IS_PIN_ENABLED = PrefMetaData("pref_pin_enabled", PrefDataType.BOOLEAN)
     val P_PIN = PrefMetaData("pref_pin", PrefDataType.STRING, true)
+    val P_PIN_FAIL_COUNT = PrefMetaData("pref_pin_fail_count", PrefDataType.STRING, true)
+    val P_PIN_LOCKOUT_UNTIL = PrefMetaData("pref_pin_lockout_until", PrefDataType.STRING, true)
     private val P_DEFAULT_REMINDER_TIME = PrefMetaData("pref_default_reminder_time", PrefDataType.STRING)
     val P_IS_AUTO_PROGRESS = PrefMetaData("pref_progress", PrefDataType.BOOLEAN)
     val P_IS_NOTIFICATION_SOUND = PrefMetaData("notify", PrefDataType.BOOLEAN)
@@ -70,6 +73,24 @@ object PreferenceMgr {
     val P_APP_THEME = PrefMetaData("pref_app_theme", PrefDataType.STRING)
     private val P_FIRST_DAY_OF_WEEK = PrefMetaData("pref_first_day_of_week", PrefDataType.STRING)
     val P_CONTENT_HOME = PrefMetaData("pref_content_home", PrefDataType.STRING)
+
+    private const val PIN_HASH_SALT = "org.secuso.privacyfriendlytodolist.pin_salt_v1"
+
+    fun hashPin(pin: String): String {
+        val input = PIN_HASH_SALT + pin
+        val digest = MessageDigest.getInstance("SHA-256")
+        val hashBytes = digest.digest(input.toByteArray(Charsets.UTF_8))
+        return hashBytes.joinToString("") { "%02x".format(it) }
+    }
+
+    fun migratePinToHash(context: Context) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val storedPin = prefs.getString(P_PIN.name, null) ?: return
+        // A SHA-256 hex hash is always exactly 64 characters; a raw PIN is 4-32 digits
+        if (storedPin.length < 64) {
+            prefs.edit { putString(P_PIN.name, hashPin(storedPin)) }
+        }
+    }
 
     fun setFirstTimeLaunch(context: Context, isFirstTimeLaunch: Boolean) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
